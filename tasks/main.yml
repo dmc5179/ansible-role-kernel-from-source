@@ -1,2 +1,14 @@
 ---
 # tasks file for kernel-from-source
+- name: Setup rpmbuild directories
+  file:
+    name: "{{ item }}"
+    state: directory
+  with_items:
+    - 'rpmbuild'
+    - 'rpmbuild/BUILD'
+    - 'rpmbuild/BUILDROOT'
+    - 'rpmbuild/RPMS'
+    - 'rpmbuild/SOURCES'
+    - 'rpmbuild/SPECS'
+    - 'rpmbuild/SRPMS'
