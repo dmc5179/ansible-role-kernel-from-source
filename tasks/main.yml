@@ -1,6 +1,7 @@
 ---
 # tasks file for kernel-from-source
 - name: Setup rpmbuild directories
+  become: true
   file:
     name: "{{ item }}"
     state: directory
@@ -12,3 +13,75 @@
     - 'rpmbuild/SOURCES'
     - 'rpmbuild/SPECS'
     - 'rpmbuild/SRPMS'
+
+- name: Create rpmmacros
+  become: true
+  lineinfile:
+    path: "~/.rpmmacros"
+    create: true
+    state: present
+    line: '%_topdir %(echo $HOME)/rpmbuild'
+
+- name: Install Required Packages
+  become: true
+  dnf:
+    state: present
+    name:
+      - asciidoc
+      - audit-libs-devel
+      - bash
+      - bc
+      - binutils
+      - binutils-devel
+      - bison
+      - diffutils
+      - elfutils
+      - elfutils-devel
+      - elfutils-libelf-devel
+      - findutils
+      - flex
+      - gawk
+      - gcc
+      - gettext
+      - gzip
+      - hmaccalc
+      - hostname
+      - java-devel
+      - m4
+      - make
+      - module-init-tools
+      - ncurses-devel
+      - net-tools
+      - newt-devel
+      - numactl-devel
+      - openssl
+      - patch
+      - pciutils-devel
+      - perl
+      - perl-ExtUtils-Embed
+      - pesign
+      - python3-devel
+      - python3-docutils
+      - redhat-rpm-config
+      - rpm-build
+      - sh-utils
+      - tar
+      - xmlto
+      - xz
+      - zlib-devel
+
+- name: Download Kernel Source
+  get_url:
+    url: http://vault.centos.org/8.1.1911/BaseOS/Source/SPackages/kernel-4.18.0-147.5.1.el8_1.src.rpm
+    dest: /tmp/kernel-4.18.0-147.5.1.el8_1.src.rpm
+    mode: 0440
+
+- name: Install kernel source
+  become: true
+  command: rpm -ihv /tmp/kernel-4.18.0-147.5.1.el8_1.src.rpm
+
+- name: Build kernel RPM
+  become: true
+  command: rpmbuild -bp --target=$(uname -m) kernel.spec
+  args:
+    chdir: '~/rpmbuild/SPECS'
